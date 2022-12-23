@@ -36,10 +36,21 @@ pip install -r requirements.txt
 ```
 
 
-### 1.1 Set up Lightly for Active Learning <a name=lightly>
-To set up `lightly` for active learning, head to the [Lightly Platform](https://app.lightly.ai) and create a free account by logging in. Make sure to get your token by clicking on your e-mail address and selecting "Preferences". You will need the token for the rest of this tutorial.
+### 1.1 Set up Lightly <a name=lightly>
+To set up `lightly` for active learning, head to the [Lightly Platform](https://app.lightly.ai) and create a free account by logging in. Make sure to get your token by clicking on your e-mail address and selecting "Preferences". You will need the token for the rest of this tutorial so let's store it in an environment variable:
+```
+export LIGHTLY_TOKEN="YOUR_TOKEN"
+```
 
-### 1.2 Set up Nvidia TLT <a name=tlt>
+Then, install the Lightly API Client and pull the latest Lightly Worker Docker image:
+```
+pip3 install lightly
+docker pull lightly/worker:latest
+```
+For a full set of instructions, check out the [docs](https://docs.lightly.ai/docs/install-lightly).
+
+
+### 1.2 Set up Nvidia TAO <a name=tlt>
 
 To install the Nvidia Transfer Learning Toolkit, follow [these instructions](https://docs.nvidia.com/metropolis/TLT/tlt-user-guide/text/requirements_and_installation.html). If you want to use custom scripts for training and inference, you can skip this part.
 
@@ -50,7 +61,12 @@ Setting up Nvidia TLT can be done in a few minutes and consists of the following
 3. Install [nvidia docker2](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
 4. Get an [NGC account and API key](https://ngc.nvidia.com/catalog).
 
-To make all relevant directories accessible to the Nvidia TLT, you need to mount the current working directory and the `yolo_v4/specs` directory to the Nvidia TLT docker. You can do so with the provided `mount.py` script.
+Make sure to keep the Nvidia API key in a safe location as we're going to need it later:
+```
+export NVIDIA_API_KEY="YOUR_NVIDIA_API_KEY"
+```
+
+To make all relevant directories accessible to Nvidia TAO, you need to mount the current working directory and the `yolo_v4/specs` directory to the Nvidia TAO docker. You can do so with the provided `mount.py` script.
 
 ```
 python mount.py
