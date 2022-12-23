@@ -1,10 +1,10 @@
-# Active Learning with the Nvidia TLT
-Tutorial on active learning with the Nvidia Transfer Learning Toolkit (TLT).
+# Active Learning with the Nvidia TAO
+Tutorial on active learning with Nvidia Train, Adapt, and Optimize (TAO).
 
-**Disclaimer:** In order to run the Nvidia TLT, you need to setup Nvidia NGC and TLT. If you don't have this already, we will walk you through it in section [1.2](#tlt).
+**Disclaimer:** In order to run the Nvidia TAO, you need to setup Nvidia NGC and TAO. If you don't have this already, we will walk you through it in section [1.2](#tlt).
 
 
-In this tutorial, we will show you how you can do active learning for object detection with the [Nvidia Transfer Learning Toolkit](https://developer.nvidia.com/transfer-learning-toolkit). The task will be object detection of apples in a plantation setting. Accurately detecting and counting fruits is a critical step towards automating harvesting processes.
+In this tutorial, we will show you how you can do active learning for object detection with [Nvidia TAO](https://developer.nvidia.com/tao-toolkit). The task will be object detection of apples in a plantation setting. Accurately detecting and counting fruits is a critical step towards automating harvesting processes.
 Furthermore, fruit counting can be used to project expected yield and hence to detect low yield years early on.
 
 The structure of the tutorial is as follows:
@@ -23,8 +23,8 @@ The structure of the tutorial is as follows:
 
 To get started, clone this repository to your machine and change the directory.
 ```
-git clone https://github.com/lightly-ai/NvidiaTLTActiveLearning.git
-cd NvidiaTLTActiveLearning
+git clone https://github.com/lightly-ai/NvidiaTAOActiveLearning.git
+cd NvidiaTAOActiveLearning
 ```
 
 
