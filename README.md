@@ -1,7 +1,7 @@
-# Active Learning with the Nvidia TAO
+# Active Learning with Nvidia TAO
 Tutorial on active learning with Nvidia Train, Adapt, and Optimize (TAO).
 
-**Disclaimer:** In order to run the Nvidia TAO, you need to setup Nvidia NGC and TAO. If you don't have this already, we will walk you through it in section [1.2](#tlt).
+**Disclaimer:** In order to run Nvidia TAO, you need to setup Nvidia NGC and TAO. If you don't have this already, we will walk you through it in section [1.2](#tlt).
 
 
 In this tutorial, we will show you how you can do active learning for object detection with [Nvidia TAO](https://developer.nvidia.com/tao-toolkit). The task will be object detection of apples in a plantation setting. Accurately detecting and counting fruits is a critical step towards automating harvesting processes.
