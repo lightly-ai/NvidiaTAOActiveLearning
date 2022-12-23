@@ -30,11 +30,7 @@ cd NvidiaTAOActiveLearning
 
 ## 1 Prerequisites <a name=prerequisites>
 
-For this tutorial, you require Python 3.6 or higher. You also need to install [`lightly`](https://github.com/lightly-ai/lightly), `numpy` and `argparse`.
-```
-pip install -r requirements.txt
-```
-
+For this tutorial, you require Python 3.6 or higher. You also need to have `numpy` installed.
 
 ### 1.1 Set up Lightly <a name=lightly>
 To set up `lightly` for active learning, head to the [Lightly Platform](https://app.lightly.ai) and create a free account by logging in. Make sure to get your token by clicking on your e-mail address and selecting "Preferences". You will need the token for the rest of this tutorial so let's store it in an environment variable:
