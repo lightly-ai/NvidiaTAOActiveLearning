@@ -151,7 +151,13 @@ The job should be picked up and processed by the Lightly Worker after a few seco
 
 <img src="./docs/gifs/MinneApple Lightly Showcase.gif">
 
-TODO: Annotate images
+Before training your machine learning model you first need to annotate the selected images. In the real world, you can use one of [Lightly's 
+export features](https://lightly-docs.readme.io/docs/export) to label the images. Here, you can simply simulate this by running
+```
+python annotate.py \
+    --dataset-name minneapple \
+    --input-dir data/
+```
 
 You can verify that the number of annotated images is correct like this:
 ```
