@@ -105,6 +105,7 @@ Car 0. 0 0. 113.0 308.0 131.0 331.0 0. 0. 0. 0. 0. 0. 0.
 ### 1.4 Cloud Storage <a name=cloudstorage>
 
 TODO: Set up S3
+TODO: Create prediction directory
 
 ## 2 Active Learning <a name=al>
 Now that the setup is complete, you can start the active learning loop. In general, the active learning loop will consist of the following steps:
@@ -117,11 +118,27 @@ We will walk you through all three steps in this tutorial.
 
 ### 2.1 Initial Selection <a name=selection>
 
-TODO: Start up worker and run `schedule.py`
+
+
+TODO: Start up worker
+
+To schedule a selection job, simply run
+```
+python schedule.py \
+    --dataset-name minneapple \
+    --s3-input-path $S3_INPUT_PATH \
+    --s3-input-role-arn $S3_INPUT_ROLE_ARN \
+    --s3-input-external-id $S3_INPUT_EXTERNAL_ID \
+    --s3-lightly-path $S3_LIGHTLY_PATH \
+    --s3-lightly-role-arn $S3_LIGHTLY_ROLE_ARN \
+    --s3-lightly-external-id $S3_LIGHTLY_EXTERNAL_ID
+```
 
 The above script roughly performs the following steps:
 
-TODO: Explain the steps
+- It creates a new dataset in the [Lightly Platform](https://app.lightly.ai) named after the `--dataset-name`.
+- If a dataset with the same name already exists, it chooses that one.
+- It schedules a job to select images based on diversity and prediction uncertainty _if predictions exist_.
 
 Once the upload has finished, you can visually explore your dataset in the [Lightly Platform](https://app.lightly.ai/).
 
