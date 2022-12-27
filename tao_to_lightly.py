@@ -10,10 +10,12 @@ def tao_to_lightly(input_dir: Path) -> None:
     task_name = "minneapple"
 
     # Create the necessary directories.
-    output_dir = Path(".lightly/")
-    prediction_dir = output_dir / "predictions"
+    lightly_dir = Path(".lightly/")
+    prediction_dir = lightly_dir / "predictions"
     minneapple_dir = prediction_dir / task_name
-    minneapple_dir.mkdir(parents=True)
+    output_dir = minneapple_dir / "raw/images/"
+
+    output_dir.mkdir(parents=True)
 
     # Convert the predictions from TAO to Lightly
     for tao_prediction_file in tqdm(input_dir.glob("*.txt")):
@@ -22,7 +24,9 @@ def tao_to_lightly(input_dir: Path) -> None:
         if len(contents.shape) > 1:
 
             lightly_prediction = {
-                "file_name": str(tao_prediction_file.with_suffix(".png")),  # TODO
+                "file_name": str(
+                    Path("raw/images/") / tao_prediction_file.with_suffix(".png").name
+                ),
                 "predictions": [],
             }
 
@@ -49,7 +53,7 @@ def tao_to_lightly(input_dir: Path) -> None:
                 )
 
             lightly_prediction_file = (
-                minneapple_dir / tao_prediction_file.with_suffix(".json").name
+                output_dir / tao_prediction_file.with_suffix(".json").name
             )
             with lightly_prediction_file.open("w") as f:
                 json.dump(lightly_prediction, f)
