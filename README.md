@@ -14,8 +14,9 @@ The structure of the tutorial is as follows:
     1. [Set up Lightly](#lightly)
     2. [Set up Nvidia TLT](#tlt)
     3. [Data](#data)
+    4. [Cloud Storage](#cloudstorage)
 2. [Active Learning](#al)
-    1. [Initial Sampling](#sampling)
+    1. [Initial Selection](#selection)
     2. [Training and Inference](#training)
     3. [Active Learning Step](#alstep)
     4. [Re-training](#retraining)
@@ -100,90 +101,33 @@ Car 0. 0 0. 111.0 274.0 142.0 306.0 0. 0. 0. 0. 0. 0. 0.
 Car 0. 0 0. 113.0 308.0 131.0 331.0 0. 0. 0. 0. 0. 0. 0.
 ```
 
+
+### 1.4 Cloud Storage <a name=cloudstorage>
+
+TODO: Set up S3
+
 ## 2 Active Learning <a name=al>
 Now that the setup is complete, you can start the active learning loop. In general, the active learning loop will consist of the following steps:
-1. Initial sampling: Get an initial set of images to annotate and train on.
+1. Initial selection: Get an initial set of images to annotate and train on.
 2. Training and inference: Train on the labeled data and make predictions on all data.
 3. Active learning query: Use the predictions to get the next set of images to annotate, go to 2.
 
 We will walk you through all three steps in this tutorial.
 
-To do active learning with Lightly, you first need to upload your dataset to the platform. The command `lightly-magic` trains a self-supervised model to get good image representations and then uploads the images along with the image representations to the platform. If you want to skip training, you can set `trainer.max_epochs=0`. In the following command, replace `MY_TOKEN` with your token from the platform.
 
-> You can also upload thumbnails or even just metadata about the images. See [this link](https://docs.lightly.ai/lightly.cli.html#lightly.cli.upload_cli.upload_cli) for more information.
+### 2.1 Initial Selection <a name=selection>
 
-> If you get an out-of-memory error, try decreasing the input size of the images with, e.g., `collate.input_size=128`.
+TODO: Start up worker and run `schedule.py`
 
-```
-lightly-magic \
-    input_dir=./data/raw/images \
-    trainer.max_epochs=0 \
-    loader.num_workers=8 \
-    collate.input_size=512 \
-    new_dataset_name="MinneApple" \
-    token=MY_TOKEN
-```
+The above script roughly performs the following steps:
 
-The above command will display the id of your dataset. You will need this later in the tutorial.
+TODO: Explain the steps
 
 Once the upload has finished, you can visually explore your dataset in the [Lightly Platform](https://app.lightly.ai/).
 
 <img src="./docs/gifs/MinneApple Lightly Showcase.gif">
 
-
-### 2.1 Initial Sampling <a name=sampling>
-
-Now, let's select an initial batch of images for annotation and training.
-
-Lightly offers different sampling strategies, the most prominent ones being `CORESET` and `RANDOM` sampling. `RANDOM` sampling will preserve the underlying distribution of your dataset well while `CORESET` maximizes the heterogeneity of your dataset. While exploring our dataset in the [Lightly Platform](https://app.lightly.ai), we noticed many different clusters therefore we choose `CORESET` sampling to make sure that every cluster is represented in the training data.
-
-Use the `active_learning_query.py` script to make an initial selection:
-
-```
-python active_learning_query.py \
-    --token YOUR_TOKEN \
-    --dataset_id YOUR_DATASET_ID \
-    --new_tag_name 'initial-selection' \
-    --n_samples 100 \
-    --method CORESET
-```
-
-> The script will create a new tag name `initial-selection` in the Lightly web-app. In case you want to run the script again, make sure to first change the `new_tag_name` to something else.
-
-The above script roughly performs the following steps:
-
-It creates an API client to communicate with the Lightly API.
-
-```python
-# create an api client
-client = ApiWorkflowClient(
-    token=YOUR_TOKEN,
-    dataset_id=YOUR_DATASET_ID,
-)
-```
-Then, it creates an active learning agent which serves as an interface to do active learning.
-
-```python
-# create an active learning agent
-al_agent = ActiveLearningAgent(client)
-```
-
-Finally, it creates a sampling configuration, makes an active learning query, and puts the annotated images into the `data/train` directory.
-
-```python
-# make an active learning query
-config = SamplerConfig(
-    n_samples=100,
-    method=SamplingMethod.CORESET,
-    name='initial-selection',
-)
-al_agent.query(config)
-
-# simulate annotation step by copying the data to the data/train directory 
-helpers.annotate_images(al_agent.added_set)
-```
-
-The `query` will automatically create a new tag with the name `initial-selection` in the Lightly Platform.
+TODO: Annotate images
 
 You can verify that the number of annotated images is correct like this:
 ```
@@ -197,27 +141,27 @@ The expected output is:
 ```
 
 ### 2.2 Training and Inference <a name=training>
-Now that we have our annotated training data, let's train an object detection model on it and see how well it works! Use the Nvidia Transfer Learning Toolkit to train a YOLOv4 object detector from the command line. The cool thing about transfer learning is that you don't have to train a model from scratch and therefore require fewer annotated images to get good results.
+Now that we have our annotated training data, let's train an object detection model on it and see how well it works! Use Nvidia TAO to train a YOLOv4 object detector from the command line. The cool thing about transfer learning is that you don't have to train a model from scratch and therefore require fewer annotated images to get good results.
 
 Start by downloading a pre-trained object detection model from the Nvidia registry.
 
 ```
 mkdir -p ./yolo_v4/pretrained_resnet18
-ngc registry model download-version nvidia/tlt_pretrained_object_detection:resnet18 \
-    --dest ./yolo_v4/pretrained_resnet18
+ngc registry model download-version nvidia/tao/pretrained_object_detection:resnet18 \
+    --dest yolo_v4/pretrained_resnet18/
 ```
 
-Finetuning the object detector on the sampled training data is as simple as the following command. Make sure to replace YOUR_KEY with the API token you get from your [Nvidia account](https://ngc.nvidia.com/catalog)
+Finetuning the object detector on the sampled training data is as simple as the following command. Make sure to replace `$NVIDIA_API_KEY` with the API token you get from your [Nvidia account](https://ngc.nvidia.com/catalog) if you haven't set the environment variable.
 
 > If you get an out-of-memory-error you can change the size of the input images and the batch size in the `yolo_v4/specs/yolo_v4_minneapple.txt` file. Change `output_width`/`output_height` or `batch_size_per_gpu` respectively.
 
 ```
 mkdir -p $PWD/yolo_v4/experiment_dir_unpruned
-tlt yolo_v4 train \
-    -e /workspace/tlt-experiments/yolo_v4/specs/yolo_v4_minneapple.txt \
-    -r /workspace/tlt-experiments/yolo_v4/experiment_dir_unpruned \
+tao yolo_v4 train \
+    -e /workspace/tao-experiments/yolo_v4/specs/yolo_v4_minneapple.txt \
+    -r /workspace/tao-experiments/yolo_v4/experiment_dir_unpruned \
     --gpus 1 \
-    -k YOUR_KEY
+    -k $NVIDIA_API_KEY
 ``` 
 
 Now that you have finetuned the object detector on your dataset, you can do inference to see how well it works.
@@ -225,13 +169,14 @@ Now that you have finetuned the object detector on your dataset, you can do infe
 Doing inference on the whole dataset has the advantage that you can easily figure out for which images the model performs poorly or has a lot of uncertainties.
 
 ```
-tlt yolo_v4 inference \
-    -i /workspace/tlt-experiments/data/raw/images/ \
-    -e /workspace/tlt-experiments/yolo_v4/specs/yolo_v4_minneapple.txt \
-    -m /workspace/tlt-experiments/yolo_v4/experiment_dir_unpruned/weights/yolov4_resnet18_epoch_050.tlt \
-    -o /workspace/tlt-experiments/infer_images \
-    -l /workspace/tlt-experiments/infer_labels \
-    -k MY_KEY
+tao yolo_v4 inference \
+    -i /workspace/tao-experiments/data/train/images \
+    -e /workspace/tao-experiments/yolo_v4/specs/yolo_v4_minneapple.txt \
+    -o /workspace/tao-experiments/infer_images \
+    -l /workspace/tao-experiments/infer_labels \
+    -m /workspace/tao-experiments/yolo_v4/experiment_dir_unpruned/weights/yolov4_resnet18_epoch_050.tlt <
+    --gpus 1 \
+    -k $NVIDIA_API_KEY
 ```
 
 Below you can see two example images after training. It's evident that the model does not perform well on the unlabeled image. Therefore, it makes sense to add more samples to the training dataset.
@@ -242,57 +187,9 @@ Below you can see two example images after training. It's evident that the model
 ### 2.3 Active Learning Step <a name=alstep>
 You can use the inferences from the previous step to determine which images cause the model problems. With Lightly, you can easily select these images while at the same time making sure that your training dataset is not flooded with duplicates.
 
-This section is about how to select the images which complete your training dataset. You can use the `active_learning_query.py` script again but this time you have to indicate that there already exists a set of preselected images and point the script to where the inferences are stored.
-
-Note that the `n_samples` argument indicates the total number of samples after the active learning query. The initial selection holds 100 samples and we want to add another 100 to the labeled set. Therefore, we set `n_samples=200`. 
-
-Use `CORAL` instead of `CORESET` as a sampling method. `CORAL` simultaneously maximizes the diversity and the sum of the active learning scores in the sampled data.
-
-```
-python active_learning_query.py \
-    --token YOUR_TOKEN \
-    --dataset_id YOUR_DATASET_ID \
-    --preselected_tag_name 'initial-selection' \
-    --new_tag_name 'al-iteration-1' \
-    --n_samples 200 \
-    --method CORAL
-```
-
-The script works very similarly to before but with one significant difference: This time, all the inferred labels are loaded and used to calculate an active learning score for each sample.
-
-```python
-# create a scorer to calculate active learning scores based on model outputs
-scorer = ScorerObjectDetection(model_outputs)
-```
-
-The rest of the script is almost the same as for the initial selection:
-
-```python
-# create an api client
-client = ApiWorkflowClient(
-    token=YOUR_TOKEN,
-    dataset_id=YOUR_DATASET_ID,
-)
-
-# create an active learning agent and set the preselected tag
-al_agent = ActiveLearningAgent(
-    client,
-    preselected_tag_name='initial-selection',
-)
-
-# create a sampler configuration
-config = SamplerConfig(
-    n_samples=200,
-    method=SamplingMethod.CORAL,
-    name='al-iteration-1',
-)
-
-# make an active learning query
-al_agent.query(config, scorer)
-
-# simulate the annotation step
-helpers.annotate_images(al_agent.added_set)
-```
+TODO: Convert predictions
+TODO: Run selection
+TODO: Annotate
 
 As before, we can check the number of images in the training set:
 ```
@@ -307,14 +204,14 @@ The expected output is:
 
 ### 2.4 Re-training <a name=retraining>
 
-You can re-train our object detector on the new dataset to get an even better model. For this, you can use the same command as before. If you want to continue training from the last checkpoint, make sure to replace the pretrain_model_path in the specs file by a resume_model_path:
+You can re-train our object detector on the new dataset to get an even better model. For this, you can use the same command as before. If you want to continue training from the last checkpoint, make sure to replace the `pretrain_model_path` in the specs file by a `resume_model_path`.
 
 ```
-tlt yolo_v4 train \
-    -e /workspace/tlt-experiments/yolo_v4/specs/yolo_v4_minneapple.txt \
-    -r /workspace/tlt-experiments/yolo_v4/experiment_dir_unpruned \
+tao yolo_v4 train \
+    -e /workspace/tao-experiments/yolo_v4/specs/yolo_v4_minneapple.txt \
+    -r /workspace/tao-experiments/yolo_v4/experiment_dir_unpruned \
     --gpus 1 \
-    -k MY_KEY
+    -k $NVIDIA_API_KEY
 ```
 
 If you're still unhappy with the performance after re-training the model, you can repeat steps [2.2](#training) and [2.3](#alstep) and then re-train the model again.
