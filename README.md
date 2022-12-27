@@ -217,9 +217,35 @@ Below you can see two example images after training. It's evident that the model
 ### 2.3 Active Learning Step <a name=alstep>
 You can use the inferences from the previous step to determine which images cause the model problems. With Lightly, you can easily select these images while at the same time making sure that your training dataset is not flooded with duplicates.
 
-TODO: Convert predictions
-TODO: Run selection
-TODO: Annotate
+First, convert the predictions from the Kitti format to the [Lightly prediction format](https://lightly-docs.readme.io/docs/prediction-format). You can use the following script for this:
+```
+python tao_to_lightly.py --input_dir infer_labels
+```
+
+Then, the predictions need to be synced to the S3 bucket such that the Lightly Worker can access them:
+```
+aws sync .lightly/ $S3_LIGHTLY_PATH/.lightly/
+```
+
+Now, you can simply run the same `schedule.py` and `annotate.py` commands as above again to add more images to the dataset:
+
+```
+python schedule.py \
+    --dataset-name minneapple \
+    --s3-input-path $S3_INPUT_PATH \
+    --s3-input-role-arn $S3_INPUT_ROLE_ARN \
+    --s3-input-external-id $S3_INPUT_EXTERNAL_ID \
+    --s3-lightly-path $S3_LIGHTLY_PATH \
+    --s3-lightly-role-arn $S3_LIGHTLY_ROLE_ARN \
+    --s3-lightly-external-id $S3_LIGHTLY_EXTERNAL_ID
+```
+
+```
+python annotate.py \
+    --dataset-name minneapple \
+    --input-dir data/
+```
+
 
 As before, we can check the number of images in the training set:
 ```
