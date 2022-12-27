@@ -1,5 +1,4 @@
 import argparse
-import os
 
 from lightly.api import ApiWorkflowClient
 from lightly.openapi_generated.swagger_client import DatasetType
