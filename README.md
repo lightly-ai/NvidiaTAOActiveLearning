@@ -1,7 +1,7 @@
 # Active Learning with Nvidia TAO
 Tutorial on active learning with Nvidia Train, Adapt, and Optimize (TAO).
 
-**Disclaimer:** In order to run Nvidia TAO, you need to setup Nvidia NGC and TAO. If you don't have this already, we will walk you through it in section [1.2](#tlt).
+**Disclaimer:** In order to run Nvidia TAO, you need to setup Nvidia NGC and TAO. If you don't have this already, we will walk you through it in section [1.2](#tao).
 
 
 In this tutorial, we will show you how you can do active learning for object detection with [Nvidia TAO](https://developer.nvidia.com/tao-toolkit). The task will be object detection of apples in a plantation setting. Accurately detecting and counting fruits is a critical step towards automating harvesting processes.
@@ -12,7 +12,7 @@ The structure of the tutorial is as follows:
 
 1. [Prerequisites](#prerequisites)
     1. [Set up Lightly](#lightly)
-    2. [Set up Nvidia TLT](#tlt)
+    2. [Set up Nvidia TAO](#tao)
     3. [Data](#data)
     4. [Cloud Storage](#cloudstorage)
 2. [Active Learning](#al)
@@ -47,12 +47,12 @@ docker pull lightly/worker:latest
 For a full set of instructions, check out the [docs](https://docs.lightly.ai/docs/install-lightly).
 
 
-### 1.2 Set up Nvidia TAO <a name=tlt>
+### 1.2 Set up Nvidia TAO <a name=tao>
 
-To install the Nvidia Transfer Learning Toolkit, follow [these instructions](https://docs.nvidia.com/metropolis/TLT/tlt-user-guide/text/requirements_and_installation.html). If you want to use custom scripts for training and inference, you can skip this part.
+To install Nvidia TAO, follow [these instructions](https://docs.nvidia.com/tao/tao-toolkit/text/tao_toolkit_quick_start_guide.html#tao-toolkit-package-content). If you want to use custom scripts for training and inference, you can skip this part.
 
 
-Setting up Nvidia TLT can be done in a few minutes and consists of the following steps:
+Setting up Nvidia TAO can be done in a few minutes and consists of the following steps:
 1. Install [Docker](https://www.docker.com/).
 2. Install [Nvidia GPU driver](https://www.nvidia.com/Download/index.aspx?lang=en-us) v455.xx or above.
 3. Install [nvidia docker2](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
@@ -69,7 +69,7 @@ To make all relevant directories accessible to Nvidia TAO, you need to mount the
 python mount.py
 ```
 
-Next, you need to specify all training configurations. The Nvidia TLT expects all training configurations in a `.txt` file which is stored in the `yolo_v4/specs/` directory. For the purpose of this tutorial **we provide an example in `yolo_v4_minneapple.txt`**. The most important differences to the example script provided by Nvidia are:
+Next, you need to specify all training configurations. Nvidia TAO expects all training configurations in a `.txt` file which is stored in the `yolo_v4/specs/` directory. For the purpose of this tutorial **we provide an example in `yolo_v4_minneapple.txt`**. The most important differences to the example script provided by Nvidia are:
 - Anchor Shapes: We made the anchor boxes smaller since the largest bounding boxes in our dataset are only approximately 50 pixels wide.
 - Augmentation Config: We set the output width and height of the augmentations to 704 and 1280 respectively. This corresponds to the shape of our images.
 - Target Class Mapping: For transfer learning, we made a target class mapping from `car` to `apple`. This means that every time the model would now predict a car, it predicts an apple instead.
@@ -77,7 +77,7 @@ Next, you need to specify all training configurations. The Nvidia TLT expects al
 ### 1.3 Data <a name=data>
 In this tutorial, we will use the [MinneApple fruit detection dataset](https://conservancy.umn.edu/handle/11299/206575). It consists of 670 training images of apple trees, annotated for detection and segmentation. The dataset contains images of trees with red and green apples.
 
-**Note:** The Nvidia TLT expects the data and labels in the [KITTI format](https://github.com/bostondiditeam/kitti/blob/master/resources/devkit_object/readme.txt). This means they expect one folder containing the images and one folder containing the annotations. The name of an image and its corresponding annotation file must be the same apart from the file extension. [You can find the MinneApple dataset converted to this format attached to the first release of this tutorial](https://github.com/lightly-ai/NvidiaTLTActiveLearning/releases/download/v1.0-alpha/minneapple.zip). Alternatively, you can download the files from the official link and convert the labels yourself.
+**Note:** Nvidia TAO expects the data and labels in the [KITTI format](https://github.com/bostondiditeam/kitti/blob/master/resources/devkit_object/readme.txt). This means they expect one folder containing the images and one folder containing the annotations. The name of an image and its corresponding annotation file must be the same apart from the file extension. [You can find the MinneApple dataset converted to this format attached to the first release of this tutorial](https://github.com/lightly-ai/NvidiaTLTActiveLearning/releases/download/v1.0-alpha/minneapple.zip). Alternatively, you can download the files from the official link and convert the labels yourself.
 
 Create a `data/` directory, move the downloaded `minneapple.zip` file there, and unzip it
 
@@ -87,7 +87,7 @@ unzip minneapple.zip
 cd ..
 ```
 
-Here's an example of how the converted labels look like. Note how we use the label `car` instead of `apple` because of the target class mapping we had defined in section [1.2](#tlt).
+Here's an example of how the converted labels look like. Note how we use the label `car` instead of `apple` because of the target class mapping we had defined in section [1.2](#tao).
 
 ```
 Car 0. 0 0. 1.0 228.0 6.0 241.0 0. 0. 0. 0. 0. 0. 0.
