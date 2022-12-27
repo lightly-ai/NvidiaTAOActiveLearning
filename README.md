@@ -171,7 +171,7 @@ The expected output is:
 ```
 
 ### 2.2 Training and Inference <a name=training>
-Now that we have our annotated training data, let's train an object detection model on it and see how well it works! Use Nvidia TAO to train a YOLOv4 object detector from the command line. The cool thing about transfer learning is that you don't have to train a model from scratch and therefore require fewer annotated images to get good results.
+Now that you have your annotated training data, let's train an object detection model on it and see how well it works! Use Nvidia TAO to train a YOLOv4 object detector from the command line. The cool thing about transfer learning is that you don't have to train a model from scratch and therefore require fewer annotated images to get good results.
 
 Start by downloading a pre-trained object detection model from the Nvidia registry.
 

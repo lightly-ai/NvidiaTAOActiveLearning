@@ -15,7 +15,7 @@ def tao_to_lightly(input_dir: Path) -> None:
     minneapple_dir = prediction_dir / task_name
     output_dir = minneapple_dir / "raw/images/"
 
-    output_dir.mkdir(parents=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     # Convert the predictions from TAO to Lightly
     for tao_prediction_file in tqdm(input_dir.glob("*.txt")):
