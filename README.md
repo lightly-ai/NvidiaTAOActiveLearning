@@ -118,9 +118,15 @@ We will walk you through all three steps in this tutorial.
 
 ### 2.1 Initial Selection <a name=selection>
 
+To do the initial selection, you first need to [start up the Lightly Worker](https://lightly-docs.readme.io/docs/install-lightly#register-the-lightly-worker):
 
+```
+docker run --shm-size="1024m" --gpus all --rm -it \
+    -e LIGHTLY_TOKEN=$LIGHTLY_TOKEN \
+    lightly/worker:latest \
+    worker.worker_id={MY_WORKER_ID}
+```
 
-TODO: Start up worker
 
 To schedule a selection job, simply run
 ```
@@ -140,7 +146,8 @@ The above script roughly performs the following steps:
 - If a dataset with the same name already exists, it chooses that one.
 - It schedules a job to select images based on diversity and prediction uncertainty _if predictions exist_.
 
-Once the upload has finished, you can visually explore your dataset in the [Lightly Platform](https://app.lightly.ai/).
+
+The job should be picked up and processed by the Lightly Worker after a few seconds. Once the upload has finished, you can visually explore your dataset in the [Lightly Platform](https://app.lightly.ai/).
 
 <img src="./docs/gifs/MinneApple Lightly Showcase.gif">
 
