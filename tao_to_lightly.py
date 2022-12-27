@@ -77,7 +77,7 @@ def tao_to_lightly(input_dir: Path) -> None:
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("input_dir", type=str)
+    parser.add_argument("--input_dir", type=str)
     args = parser.parse_args()
 
     tao_to_lightly(Path(args.input_dir))
