@@ -47,7 +47,7 @@ def schedule_selection(
 
     # Configure and schedule a run.
     client.schedule_compute_worker_run(
-        worker_config={},
+        worker_config={"datasource": {"process_all": True}},
         selection_config={
             "n_samples": 50,
             "strategies": [
