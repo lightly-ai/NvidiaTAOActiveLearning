@@ -66,7 +66,7 @@ export NVIDIA_API_KEY="YOUR_NVIDIA_API_KEY"
 To make all relevant directories accessible to Nvidia TAO, you need to mount the current working directory and the `yolo_v4/specs` directory to the Nvidia TAO docker. You can do so with the provided `mount.py` script.
 
 ```
-python mount.py
+python3 mount.py
 ```
 
 Next, you need to specify all training configurations. Nvidia TAO expects all training configurations in a `.txt` file which is stored in the `yolo_v4/specs/` directory. For the purpose of this tutorial **we provide an example in `yolo_v4_minneapple.txt`**. The most important differences to the example script provided by Nvidia are:
@@ -116,7 +116,7 @@ in your S3 bucket. Then, run the following commands
 
 ```
 mkdir infer_labels
-python tao_to_lightly.py
+python3 tao_to_lightly.py
 aws s3 sync .lightly/ s3://YOUR_BUCKET_HERE/minneapple_out/.lightly
 ```
 
@@ -172,7 +172,7 @@ docker run --shm-size="1024m" --gpus all --rm -it \
 
 To schedule a selection job, simply run
 ```
-python schedule.py \
+python3 schedule.py \
     --dataset-name minneapple \
     --s3-input-path $S3_INPUT_PATH \
     --s3-input-role-arn $S3_INPUT_ROLE_ARN \
@@ -196,7 +196,7 @@ The job should be picked up and processed by the Lightly Worker after a few seco
 Before training your machine learning model you first need to annotate the selected images. In the real world, you can use one of [Lightly's 
 export features](https://lightly-docs.readme.io/docs/export) to label the images. Here, you can simply simulate this by running
 ```
-python annotate.py \
+python3 annotate.py \
     --dataset-name minneapple \
     --input-dir data/
 ```
@@ -261,7 +261,7 @@ You can use the inferences from the previous step to determine which images caus
 
 First, convert the predictions from the Kitti format to the [Lightly prediction format](https://lightly-docs.readme.io/docs/prediction-format). You can use the following script for this:
 ```
-python tao_to_lightly.py --input_dir infer_labels
+python3 tao_to_lightly.py --input_dir infer_labels
 ```
 
 Then, the predictions need to be synced to the S3 bucket such that the Lightly Worker can access them:
@@ -272,7 +272,7 @@ aws sync .lightly/ $S3_LIGHTLY_PATH/.lightly/
 Now, you can simply run the same `schedule.py` and `annotate.py` commands as above again to add more images to the dataset:
 
 ```
-python schedule.py \
+python3 schedule.py \
     --dataset-name minneapple \
     --s3-input-path $S3_INPUT_PATH \
     --s3-input-role-arn $S3_INPUT_ROLE_ARN \
@@ -283,7 +283,7 @@ python schedule.py \
 ```
 
 ```
-python annotate.py \
+python3 annotate.py \
     --dataset-name minneapple \
     --input-dir data/
 ```
