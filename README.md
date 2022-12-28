@@ -31,7 +31,7 @@ cd NvidiaTAOActiveLearning
 
 ## 1 Prerequisites <a name=prerequisites>
 
-For this tutorial, you require Python 3.6 or higher. You also need to have `numpy` installed.
+For this tutorial, you require Python 3.6 or higher.
 
 ### 1.1 Set up Lightly <a name=lightly>
 To set up `lightly` for active learning, head to the [Lightly Platform](https://app.lightly.ai) and create a free account by logging in. Make sure to get your token by clicking on your e-mail address and selecting "Preferences". You will need the token for the rest of this tutorial so let's store it in an environment variable:
@@ -137,11 +137,11 @@ What you just did is prepare the output directory to be filled with predictions 
 
 Now, all that's left is to create credentials such that Lightly can access the data. For S3 buckets, we recommend to use delegated access. Follow the instructions [here](https://docs.lightly.ai/docs/aws-s3#setup-access-policies) to set up `list` and `read` permissions for the input folder and `list`, `read`, `write` and `delete` permissions for the output folder. Store the credentials in environment variables:
 ```
-export S3_INPUT_PATH="s3://YOUR_BUCKET_HERE/minneapple
+export S3_INPUT_PATH="s3://YOUR_BUCKET_HERE/minneapple"
 export S3_INPUT_ROLE_ARN="YOUR_INPUT_ROLE_ARN"
 export S3_INPUT_EXTERNAL_ID="YOUR_INPUT_EXTERNAL_ID"
 
-export S3_LIGHTLY_PATH="s3://YOUR_BUCKET_HERE/minneapple_out
+export S3_LIGHTLY_PATH="s3://YOUR_BUCKET_HERE/minneapple_out"
 export S3_LIGHTLY_ROLE_ARN="YOUR_LIGHTLY_ROLE_ARN"
 export S3_LIGHTLY_EXTERNAL_ID="YOUR_LIGHTLY_EXTERNAL_ID"
 ```
