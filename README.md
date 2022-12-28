@@ -104,8 +104,50 @@ Car 0. 0 0. 113.0 308.0 131.0 331.0 0. 0. 0. 0. 0. 0. 0.
 
 ### 1.4 Cloud Storage <a name=cloudstorage>
 
-TODO: Set up S3
-TODO: Create prediction directory
+In order for Lightly to be able to access the images, they need to be stored in a cloud storage. For the purposes of this tutorial, we'll use
+S3. Create a new S3 bucket with a directory `minneapple` and sync the raw data:
+
+```
+aws s3 sync data/ s3://YOUR_BUCKET_HERE/minneapple
+```
+
+Next, you need to create a place where Lightly can store outputs and read predictions from. Create a new directory called `minneapple_out`
+in your S3 bucket. Then, run the following commands
+
+```
+mkdir infer_labels
+python tao_to_lightly.py
+aws s3 sync .lightly/ s3://YOUR_BUCKET_HERE/minneapple_out/.lightly
+```
+
+The output directory should have the following structure now:
+```
+minneapple_out/
+└── .lightly/
+    └── predictions
+        ├── minneapple
+        │   ├── raw
+        │   │   └── images
+        │   └── schema.json
+        └── tasks.json
+```
+
+What you just did is prepare the output directory to be filled with predictions when you start doing active learning. The `tasks.json` and `schema.json` files are explained in more detail in the [Lightly documentation](https://docs.lightly.ai/docs/prediction-format).
+
+
+Now, all that's left is to create credentials such that Lightly can access the data. For S3 buckets, we recommend to use delegated access. Follow the instructions [here](https://docs.lightly.ai/docs/aws-s3#setup-access-policies) to set up `list` and `read` permissions for the input folder and `list`, `read`, `write` and `delete` permissions for the output folder. Store the credentials in environment variables:
+```
+export S3_INPUT_PATH="s3://YOUR_BUCKET_HERE/minneapple
+export S3_INPUT_ROLE_ARN="YOUR_INPUT_ROLE_ARN"
+export S3_INPUT_EXTERNAL_ID="YOUR_INPUT_EXTERNAL_ID"
+
+export S3_LIGHTLY_PATH="s3://YOUR_BUCKET_HERE/minneapple_out
+export S3_LIGHTLY_ROLE_ARN="YOUR_LIGHTLY_ROLE_ARN"
+export S3_LIGHTLY_EXTERNAL_ID="YOUR_LIGHTLY_EXTERNAL_ID"
+```
+
+Congrats! You're ready to start doing active learning with Lightly and Nvidia TAO.
+
 
 ## 2 Active Learning <a name=al>
 Now that the setup is complete, you can start the active learning loop. In general, the active learning loop will consist of the following steps:
