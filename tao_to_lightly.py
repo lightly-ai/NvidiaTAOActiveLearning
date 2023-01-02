@@ -77,6 +77,8 @@ def tao_to_lightly(input_dir: Path) -> None:
     with schema_file.open("w") as f:
         json.dump(schema, f)
 
+    print("The .lightly directory was successfully created and populated.")
+
 
 if __name__ == "__main__":
 

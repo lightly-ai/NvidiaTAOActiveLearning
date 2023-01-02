@@ -31,7 +31,7 @@ cd NvidiaTAOActiveLearning
 
 ## 1 Prerequisites <a name=prerequisites>
 
-For this tutorial, you require Python 3.6 or higher.
+For this tutorial, you require `python >= 3.6.9` and `python <= 3.9`.
 
 ### 1.1 Set up Lightly <a name=lightly>
 To set up `lightly` for active learning, head to the [Lightly Platform](https://app.lightly.ai) and create a free account by logging in. Make sure to get your token by clicking on your e-mail address and selecting "Preferences". You will need the token for the rest of this tutorial so let's store it in an environment variable:
@@ -44,7 +44,16 @@ Then, install the Lightly API Client and pull the latest Lightly Worker Docker i
 pip3 install lightly
 docker pull lightly/worker:latest
 ```
-For a full set of instructions, check out the [docs](https://docs.lightly.ai/docs/install-lightly).
+For a full set of instructions, check out the [docs](https://docs.lightly.ai/docs/install-lightly). Finally, register the Lightly Worker in the Lightly Platform by running the following script:
+```
+python3 register_worker.py
+```
+
+Store the worker id from the output in an environment variable:
+```
+export LIGHTLY_WORKER_ID="YOUR_WORKER_ID"
+```
+
 
 
 ### 1.2 Set up Nvidia TAO <a name=tao>
@@ -57,6 +66,14 @@ Setting up Nvidia TAO can be done in a few minutes and consists of the following
 2. Install [Nvidia GPU driver](https://www.nvidia.com/Download/index.aspx?lang=en-us) v455.xx or above.
 3. Install [nvidia docker2](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
 4. Get an [NGC account and API key](https://ngc.nvidia.com/catalog).
+5. Install the `ngc` [command-line tool](https://ngc.nvidia.com/setup/installers/cli)
+6. Install the Nvidia [TAO launcher](https://docs.nvidia.com/tao/tao-toolkit/text/tao_toolkit_quick_start_guide.html#installing-tao-launcher)
+
+Check your installation is correct:
+```
+which ngc
+which tao
+```
 
 Make sure to keep the Nvidia API key in a safe location as we're going to need it later:
 ```
@@ -82,9 +99,11 @@ In this tutorial, we will use the [MinneApple fruit detection dataset](https://c
 Create a `data/` directory, move the downloaded `minneapple.zip` file there, and unzip it
 
 ```
-cd data/
-unzip minneapple.zip
-cd ..
+  mkdir data
+  cd data
+  wget "https://github.com/lightly-ai/NvidiaTLTActiveLearning/releases/download/v1.0-alpha/minneapple.zip"
+  unzip minneapple.zip
+  cd ..
 ```
 
 Here's an example of how the converted labels look like. Note how we use the label `car` instead of `apple` because of the target class mapping we had defined in section [1.2](#tao).
@@ -105,22 +124,31 @@ Car 0. 0 0. 113.0 308.0 131.0 331.0 0. 0. 0. 0. 0. 0. 0.
 ### 1.4 Cloud Storage <a name=cloudstorage>
 
 In order for Lightly to be able to access the images, they need to be stored in a cloud storage. For the purposes of this tutorial, we'll use
-S3. Create a new S3 bucket with a directory `minneapple` and sync the raw data:
+S3. Create a new S3 bucket with a directory `minneapple`. 
+
+Next, make sure you have the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) tool installed:
+
+```
+aws --version
+```
+
+Sync the raw data:
 
 ```
 aws s3 sync data/ s3://YOUR_BUCKET_HERE/minneapple
 ```
+
 
 Next, you need to create a place where Lightly can store outputs and read predictions from. Create a new directory called `minneapple_out`
 in your S3 bucket. Then, run the following commands
 
 ```
 mkdir infer_labels
-python3 tao_to_lightly.py
+python3 tao_to_lightly.py --input_dir infer_labels
 aws s3 sync .lightly/ s3://YOUR_BUCKET_HERE/minneapple_out/.lightly
 ```
 
-The output directory should have the following structure now:
+The output directory in your S3 bucket should have the following structure now:
 ```
 minneapple_out/
 └── .lightly/
@@ -137,6 +165,8 @@ What you just did is prepare the output directory to be filled with predictions 
 
 Now, all that's left is to create credentials such that Lightly can access the data. For S3 buckets, we recommend to use delegated access. Follow the instructions [here](https://docs.lightly.ai/docs/aws-s3#setup-access-policies) to set up `list` and `read` permissions for the input folder and `list`, `read`, `write` and `delete` permissions for the output folder. Store the credentials in environment variables:
 ```
+export S3_REGION="YOUR_S3_REGION"
+
 export S3_INPUT_PATH="s3://YOUR_BUCKET_HERE/minneapple"
 export S3_INPUT_ROLE_ARN="YOUR_INPUT_ROLE_ARN"
 export S3_INPUT_EXTERNAL_ID="YOUR_INPUT_EXTERNAL_ID"
@@ -160,20 +190,25 @@ We will walk you through all three steps in this tutorial.
 
 ### 2.1 Initial Selection <a name=selection>
 
-To do the initial selection, you first need to [start up the Lightly Worker](https://lightly-docs.readme.io/docs/install-lightly#register-the-lightly-worker):
+To do the initial selection, you first need to [start up the Lightly Worker](https://lightly-docs.readme.io/docs/install-lightly#register-the-lightly-worker). Open up a new terminal, and run the following commands:
 
+```
+export LIGHTLY_TOKEN="YOUR_TOKEN"
+export LIGHTLY_WORKER_ID="YOUR_WORKER_ID"
+```
 ```
 docker run --shm-size="1024m" --gpus all --rm -it \
     -e LIGHTLY_TOKEN=$LIGHTLY_TOKEN \
     lightly/worker:latest \
-    worker.worker_id={MY_WORKER_ID}
+    worker.worker_id=$LIGHTLY_WORKER_ID
 ```
 
 
-To schedule a selection job, simply run
+To schedule a selection job, switch to your first terminal and run
 ```
 python3 schedule.py \
     --dataset-name minneapple \
+    --s3-region $S3_REGION \
     --s3-input-path $S3_INPUT_PATH \
     --s3-input-role-arn $S3_INPUT_ROLE_ARN \
     --s3-input-external-id $S3_INPUT_EXTERNAL_ID \
@@ -246,7 +281,7 @@ tao yolo_v4 inference \
     -e /workspace/tao-experiments/yolo_v4/specs/yolo_v4_minneapple.txt \
     -o /workspace/tao-experiments/infer_images \
     -l /workspace/tao-experiments/infer_labels \
-    -m /workspace/tao-experiments/yolo_v4/experiment_dir_unpruned/weights/yolov4_resnet18_epoch_050.tlt <
+    -m /workspace/tao-experiments/yolo_v4/experiment_dir_unpruned/weights/yolov4_resnet18_epoch_050.tlt \
     --gpus 1 \
     -k $NVIDIA_API_KEY
 ```
@@ -274,6 +309,7 @@ Now, you can simply run the same `schedule.py` and `annotate.py` commands as abo
 ```
 python3 schedule.py \
     --dataset-name minneapple \
+    --s3-region $S3_REGION \
     --s3-input-path $S3_INPUT_PATH \
     --s3-input-role-arn $S3_INPUT_ROLE_ARN \
     --s3-input-external-id $S3_INPUT_EXTERNAL_ID \
@@ -302,7 +338,7 @@ The expected output is:
 
 ### 2.4 Re-training <a name=retraining>
 
-You can re-train our object detector on the new dataset to get an even better model. For this, you can use the same command as before. If you want to continue training from the last checkpoint, make sure to replace the `pretrain_model_path` in the specs file by a `resume_model_path`.
+You can re-train our object detector on the new dataset to get an even better model. For this, you can use the same command as before. If you want to continue training from the last checkpoint, make sure to replace the `pretrain_model_path` in the [specs file](yolo_v4/specs/yolo_v4_minneapple.txt) by a `resume_model_path`.
 
 ```
 tao yolo_v4 train \

@@ -3,3 +3,4 @@ yolo_v4/pretrained_resnet18
 data/
 infer_images/
 infer_labels/
+.lightly/

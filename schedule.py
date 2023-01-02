@@ -48,7 +48,7 @@ def schedule_selection(
     )
 
     # Configure and schedule a run.
-    client.schedule_compute_worker_run(
+    scheduled_run_id = client.schedule_compute_worker_run(
         worker_config={"datasource": {"process_all": True}},
         selection_config={
             "n_samples": 100,
@@ -67,6 +67,19 @@ def schedule_selection(
             ],
         },
     )
+
+    # Watch the job
+    for run_info in client.compute_worker_run_info_generator(
+        scheduled_run_id=scheduled_run_id
+    ):
+        print(
+            f"Lightly Worker run is now in state='{run_info.state}' with message='{run_info.message}'"
+        )
+
+    if run_info.ended_successfully():
+        print("Success!")
+    else:
+        print("Failure!")
 
 
 if __name__ == "__main__":
