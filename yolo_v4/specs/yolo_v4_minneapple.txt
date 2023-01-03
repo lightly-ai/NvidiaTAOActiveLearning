@@ -8,9 +8,9 @@ yolov4_config {
   arch: "resnet"
   nlayers: 18
   arch_conv_blocks: 2
-  loss_loc_weight: 0.8
-  loss_neg_obj_weights: 100.0
-  loss_class_weights: 0.5
+  loss_loc_weight: 1.0
+  loss_neg_obj_weights: 1.0
+  loss_class_weights: 1.0
   label_smoothing: 0.0
   big_grid_xy_extend: 0.05
   mid_grid_xy_extend: 0.1
@@ -20,7 +20,7 @@ yolov4_config {
   force_relu: false
 }
 training_config {
-  batch_size_per_gpu: 8
+  batch_size_per_gpu: 4
   num_epochs: 50
   enable_qat: false
   checkpoint_interval: 10
@@ -47,7 +47,7 @@ training_config {
 }
 eval_config {
   average_precision_mode: SAMPLE
-  batch_size: 1
+  batch_size: 8
   matching_iou_threshold: 0.5
 }
 nms_config {
@@ -64,8 +64,8 @@ augmentation_config {
   jitter: 0.3
   output_width: 704
   output_height: 1280
-  randomize_input_shape_period: 0
   output_channel: 3
+  randomize_input_shape_period: 0
   mosaic_prob: 0.5
   mosaic_min_ratio:0.2
 }
@@ -75,6 +75,7 @@ dataset_config {
       image_directory_path: "/workspace/tao-experiments/data/train/images"
   }
   include_difficult_in_training: true
+  image_extension: "png"
   validation_data_sources: {
       label_directory_path: "/workspace/tao-experiments/data/train/labels"
       image_directory_path: "/workspace/tao-experiments/data/train/images"
