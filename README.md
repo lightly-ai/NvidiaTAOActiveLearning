@@ -65,7 +65,7 @@ Setting up Nvidia TAO can be done in a few minutes and consists of the following
 1. Install [Docker](https://www.docker.com/).
 2. Install [Nvidia GPU driver](https://www.nvidia.com/Download/index.aspx?lang=en-us) v455.xx or above.
 3. Install [nvidia docker2](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
-4. Get an [NGC account and API key](https://ngc.nvidia.com/catalog).
+4. Get an [NGC account and API key](https://ngc.nvidia.com/catalog). The API key can be found in the settings (top right), under "Setup" and ["Generate API Key"](https://ngc.nvidia.com/setup/api-key).
 5. Install the `ngc` [command-line tool](https://ngc.nvidia.com/setup/installers/cli)
 6. Install the Nvidia [TAO launcher](https://docs.nvidia.com/tao/tao-toolkit/text/tao_toolkit_quick_start_guide.html#installing-tao-launcher)
 
@@ -103,7 +103,17 @@ Create a `data/` directory, move the downloaded `minneapple.zip` file there, and
   cd data
   wget "https://github.com/lightly-ai/NvidiaTLTActiveLearning/releases/download/v1.0-alpha/minneapple.zip"
   unzip minneapple.zip
+  rm minneapple.zip
   cd ..
+  tree -d data/
+```
+
+The output of the `tree` command should be:
+```
+data/
+└── raw
+    ├── images
+    └── labels
 ```
 
 Here's an example of how the converted labels look like. Note how we use the label `car` instead of `apple` because of the target class mapping we had defined in section [1.2](#tao).
@@ -258,7 +268,7 @@ ngc registry model download-version nvidia/tao/pretrained_object_detection:resne
     --dest yolo_v4/pretrained_resnet18/
 ```
 
-Finetuning the object detector on the sampled training data is as simple as the following command. Make sure to replace `$NVIDIA_API_KEY` with the API token you get from your [Nvidia account](https://ngc.nvidia.com/catalog) if you haven't set the environment variable.
+Finetuning the object detector on the sampled training data is as simple as the following command.
 
 > If you get an out-of-memory-error you can change the size of the input images and the batch size in the `yolo_v4/specs/yolo_v4_minneapple.txt` file. Change `output_width`/`output_height` or `batch_size_per_gpu` respectively.
 
