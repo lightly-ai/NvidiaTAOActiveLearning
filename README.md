@@ -269,7 +269,18 @@ tao yolo_v4 train \
     -r /workspace/tao-experiments/yolo_v4/experiment_dir_unpruned \
     --gpus 1 \
     -k $NVIDIA_API_KEY
-``` 
+```
+After 50 epochs, the mAP should be around `0.4`:
+```
+Epoch 50/50
+24/24 [==============================] - 18s 755ms/step - loss: 3724.1823
+Producing predictions: 100%|██████████████████████████████████████████████████████████| 12/12 [00:13<00:00,  1.09s/it]
+*******************************
+apple         AP    0.38859
+              mAP   0.38859
+*******************************
+Validation loss: 3161.037371504934
+```
 
 Now that you have finetuned the object detector on your dataset, you can do inference to see how well it works.
 
