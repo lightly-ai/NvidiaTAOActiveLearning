@@ -164,6 +164,7 @@ The `tao_to_lightly.py` file performs the followings steps:
 - It lists all predictions in the directory `infer_labels` (currently none!).
 - If there are predictions, it converts them to the Lightly format and stores them in `.lightly/predictions`.
 - It creates the required `tasks.json` and `schema.json` files under `.lightly/predictions` (visit the [Lightly documentation](https://docs.lightly.ai/docs/prediction-format) for more information).
+
 If you want to write your own script, you can take [ours as a reference](tao_to_lightly.py). Note that we will run this exact script again once we have our first set of predictions.
 
 The output directory in your S3 bucket should have the following structure now:
