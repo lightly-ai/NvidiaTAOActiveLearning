@@ -3,9 +3,11 @@ Tutorial on active learning with Nvidia Train, Adapt, and Optimize (TAO).
 
 **Disclaimer:** In order to run Nvidia TAO, you need to setup Nvidia NGC and TAO. If you don't have this already, we will walk you through it in section [1.2](#tao).
 
-
 In this tutorial, we will show you how you can do active learning for object detection with [Nvidia TAO](https://developer.nvidia.com/tao-toolkit). The task will be object detection of apples in a plantation setting. Accurately detecting and counting fruits is a critical step towards automating harvesting processes.
 Furthermore, fruit counting can be used to project expected yield and hence to detect low yield years early on.
+
+The goal of the tutorial is to train an object detection model to good accuracy with as little labeling as possible. For this, we do active learning 
+with the Lightly Worker and use the Nvidia TAO framework as it's optimized for fast transfer learning on small datasets.
 
 The structure of the tutorial is as follows:
 
@@ -44,7 +46,7 @@ Then, install the Lightly API Client and pull the latest Lightly Worker Docker i
 pip3 install lightly
 docker pull lightly/worker:latest
 ```
-For a full set of instructions, check out the [docs](https://docs.lightly.ai/docs/install-lightly). Finally, register the Lightly Worker in the Lightly Platform by running the following script:
+For a full set of instructions, check out the [docs](https://docs.lightly.ai/docs/install-lightly). Finally, register the Lightly Worker in the Lightly Platform by running the following script (note that the Lightly token is fetched from the environment variable):
 ```
 python3 register_worker.py
 ```
@@ -158,6 +160,12 @@ python3 tao_to_lightly.py --input_dir infer_labels
 aws s3 sync .lightly/ s3://YOUR_BUCKET_HERE/minneapple_out/.lightly
 ```
 
+The `tao_to_lightly.py` file performs the followings steps:
+- It lists all predictions in the directory `infer_labels` (currently none!).
+- If there are predictions, it converts them to the Lightly format and stores them in `.lightly/predictions`.
+- It creates the required `tasks.json` and `schema.json` files under `.lightly/predictions` (visit the [Lightly documentation](https://docs.lightly.ai/docs/prediction-format) for more information).
+If you want to write your own script, you can take [ours as a reference](tao_to_lightly.py). Note that we will run this exact script again once we have our first set of predictions.
+
 The output directory in your S3 bucket should have the following structure now:
 ```
 minneapple_out/
@@ -170,7 +178,7 @@ minneapple_out/
         └── tasks.json
 ```
 
-What you just did is prepare the output directory to be filled with predictions when you start doing active learning. The `tasks.json` and `schema.json` files are explained in more detail in the [Lightly documentation](https://docs.lightly.ai/docs/prediction-format).
+What you just did is prepare the output directory to be filled with predictions when you start doing active learning.
 
 
 Now, all that's left is to create credentials such that Lightly can access the data. For S3 buckets, we recommend to use delegated access. Follow the instructions [here](https://docs.lightly.ai/docs/aws-s3#setup-access-policies) to set up `list` and `read` permissions for the input folder and `list`, `read`, `write` and `delete` permissions for the output folder. Store the credentials in environment variables:
@@ -233,6 +241,7 @@ The above script roughly performs the following steps:
 - If a dataset with the same name already exists, it chooses that one.
 - It schedules a job to select images based on diversity and prediction uncertainty _if predictions exist_.
 
+You can use it as a [reference](schedule.py) to write your own script for scheduling jobs.
 
 The job should be picked up and processed by the Lightly Worker after a few seconds. Once the upload has finished, you can visually explore your dataset in the [Lightly Platform](https://app.lightly.ai/).
 
@@ -245,6 +254,8 @@ python3 annotate.py \
     --dataset-name minneapple \
     --input-dir data/
 ```
+
+The above script copies images and labels from `data/raw` to `data/train`.
 
 You can verify that the number of annotated images is correct like this:
 ```
