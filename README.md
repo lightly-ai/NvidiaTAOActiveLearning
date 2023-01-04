@@ -256,7 +256,13 @@ python3 annotate.py \
     --input-dir data/
 ```
 
-The above script copies images and labels from `data/raw` to `data/train`.
+The above script copies images and labels from `data/raw` to `data/train`. In real life, you would have to do the labeling or outsource it:
+
+1. [Export the images](https://lightly-docs.readme.io/docs/export) and load them into an annotation tool.
+2. Annotate the images in the annotation tool.
+3. Export the labels in the Kitti format (expected by TAO).
+4. Add the annotated images to `data/train/images` and the labels to `data/train/labels`.
+
 
 You can verify that the number of annotated images is correct like this:
 ```
