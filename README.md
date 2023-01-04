@@ -292,16 +292,16 @@ tao yolo_v4 train \
     --gpus 1 \
     -k $NVIDIA_API_KEY
 ```
-After 50 epochs, the mAP should be around `0.4`:
+After 50 epochs, the mAP should be around `0.45`:
 ```
 Epoch 50/50
-24/24 [==============================] - 18s 755ms/step - loss: 3724.1823
-Producing predictions: 100%|██████████████████████████████████████████████████████████| 12/12 [00:13<00:00,  1.09s/it]
+25/25 [==============================] - 19s 779ms/step - loss: 3211.5103
+Producing predictions: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 13/13 [00:19<00:00,  1.48s/it]
+Start to calculate AP for each class
 *******************************
-apple         AP    0.38859
-              mAP   0.38859
+apple         AP    0.47147
+              mAP   0.47147
 *******************************
-Validation loss: 3161.037371504934
 ```
 
 Now that you have finetuned the object detector on your dataset, you can do inference to see how well it works.
@@ -310,7 +310,7 @@ Doing inference on the whole dataset has the advantage that you can easily figur
 
 ```
 tao yolo_v4 inference \
-    -i /workspace/tao-experiments/data/train/images \
+    -i /workspace/tao-experiments/data/raw/images \
     -e /workspace/tao-experiments/yolo_v4/specs/yolo_v4_minneapple.txt \
     -o /workspace/tao-experiments/infer_images \
     -l /workspace/tao-experiments/infer_labels \
